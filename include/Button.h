@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <cstdint>
 #include <string>
+#include <functional>
 
 class UI;
 
@@ -33,6 +34,10 @@ public:
         }
     }
 
+    void SetCallback(std::function<void()> Callback) {
+        OnClickCallback = std::move(Callback);
+    }
+
     void OnLeftClick() override {
         using namespace UserEvents;
         SDL_Event Event{isSettingsOpen ? CLOSE_SETTINGS : OPEN_SETTINGS};
@@ -42,15 +47,20 @@ public:
         }
 
         SDL_PushEvent(&Event);
+
+        if (OnClickCallback) {
+                OnClickCallback();
+        }
     }
 
     UserEvents::SettingsConfig GetConfig() { return Config; }
 
-    std::string GetLocation() { return "The Main Menu"; }
+    std::string GetLocation() { return "Game Menu"; }
 
 private:
-    UserEvents::SettingsConfig Config{UserEvents::SettingsPage::GAMEPLAY, 50, 100};
+    UserEvents::SettingsConfig Config{UserEvents::SettingsPage::GAMEPLAY, 1920/2-255/2, 1080/2+50};
 
     UI &UIManager;
     bool isSettingsOpen{false};
+    std::function<void()> OnClickCallback;
 };

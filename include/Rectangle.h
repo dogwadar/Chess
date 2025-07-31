@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_ttf.h>
 #include <cstdint>
 #include <string>
@@ -75,7 +76,12 @@ public:
 
     SDL_Color GetHoverColor() const { return HoverColor; }
 
+    const SDL_Rect& GetRect() const {
+        return Rect;
+    }
+
 protected:
+    SDL_Rect Rect;
     void UpdateFont() {
         if (Font) {
             TTF_CloseFont(Font);
@@ -98,7 +104,6 @@ private:
     std::string FontPath = "../font/terminal.ttf";
     TTF_Font* Font = nullptr;
 
-    SDL_Rect Rect;
     SDL_Color Color{255, 0, 0};
     SDL_Color HoverColor{0, 0, 255};
 
