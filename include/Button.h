@@ -6,12 +6,12 @@
 #include <string>
 #include <functional>
 
-class UI;
+class MainMenu;
 
 class Button : public Rectangle {
 public:
     Button(
-        UI &UIManager,
+        MainMenu &UIManager,
         const SDL_Rect &Rect,
         SDL_Color color,
         std::string text,
@@ -60,7 +60,7 @@ public:
 private:
     UserEvents::SettingsConfig Config{UserEvents::SettingsPage::GAMEPLAY, 1920/2-255/2, 1080/2+50};
 
-    UI &UIManager;
+    MainMenu &UIManager;
     bool isSettingsOpen{false};
     std::function<void()> OnClickCallback;
 };

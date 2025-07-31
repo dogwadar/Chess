@@ -7,7 +7,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include "../include/Window.h"
-#include "../include/UI.h"
+#include "../include/GameStateController.h"
+
 
 int main() {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -22,21 +23,21 @@ int main() {
     }
 
     Window GameWindow;
-    UI UIManager;
+    GameStateController Controller;
 
     SDL_Event E;
     while (true) {
         while (SDL_PollEvent(&E)) {
-            UIManager.HandleEvent(E);
             if (E.type == SDL_QUIT) {
                 TTF_Quit();
                 SDL_Quit();
                 return 0;
             }
+            Controller.HandleEvent(E);
         }
 
         GameWindow.Render();
-        UIManager.Render(GameWindow.GetSurface());
+        Controller.Render(GameWindow.GetSurface());
         GameWindow.Update();
     }
 
