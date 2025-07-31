@@ -1,66 +1,93 @@
 #pragma once
-#include "Rectangle.h"
-#include "UserEvents.h"
+
 #include <SDL2/SDL.h>
-#include <cstdint>
+#include <SDL2/SDL_ttf.h>
 #include <string>
 #include <functional>
+#include <iostream>
 
 class MainMenu;
 
-class Button : public Rectangle {
+class Button {
 public:
     Button(
-        MainMenu &UIManager,
-        const SDL_Rect &Rect,
+        MainMenu& UIManager,
+        const SDL_Rect& rect,
         SDL_Color color,
-        std::string text,
-        SDL_Color text_color,
-        int16_t font_size
-    ): Rectangle{Rect}, UIManager{UIManager} {
-        SetColor(color);
-        SetText(text);
-        SetTextColor(text_color);
-        SetFontSize(font_size);
-    }
-
-    void HandleEvent(SDL_Event &E) {
-        Rectangle::HandleEvent(E);
-        using namespace UserEvents;
-        if (E.type == CLOSE_SETTINGS) {
-            isSettingsOpen = false;
-        } else if (E.type == OPEN_SETTINGS) {
-            isSettingsOpen = true;
+        const std::string& text,
+        SDL_Color textColor,
+        int16_t fontSize,
+        TTF_Font* font
+    )
+    : UIManager(UIManager), Rect(rect), Color(color), Text(text),
+      TextColor(textColor), FontSize(fontSize), Font(font)
+    {
+        if (!Font) {
+            std::cerr << "Warning: Button created with null font pointer.\n";
         }
     }
 
-    void SetCallback(std::function<void()> Callback) {
-        OnClickCallback = std::move(Callback);
+    bool HandleEvent(SDL_Event& e) {
+        if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+            int x = e.button.x;
+            int y = e.button.y;
+            if (x >= Rect.x && x <= Rect.x + Rect.w &&
+                y >= Rect.y && y <= Rect.y + Rect.h) {
+                OnLeftClick();
+                return true;
+            }
+        }
+        return false;
     }
 
-    void OnLeftClick() override {
-        using namespace UserEvents;
-        SDL_Event Event{isSettingsOpen ? CLOSE_SETTINGS : OPEN_SETTINGS};
+    void Render(SDL_Surface* surface) const {
+        SDL_FillRect(surface, &Rect, SDL_MapRGB(surface->format, Color.r, Color.g, Color.b));
 
-        if (Event.type == OPEN_SETTINGS) {
-            Event.user.data1 = this;
+        if (!Font) return;
+
+        SDL_Surface* textSurface = TTF_RenderUTF8_Blended(Font, Text.c_str(), TextColor);
+        if (!textSurface) {
+            std::cerr << "Failed to render button text: " << TTF_GetError() << std::endl;
+            return;
         }
 
-        SDL_PushEvent(&Event);
+        SDL_Rect textRect;
+        textRect.w = textSurface->w;
+        textRect.h = textSurface->h;
+        textRect.x = Rect.x + (Rect.w - textRect.w) / 2;
+        textRect.y = Rect.y + (Rect.h - textRect.h) / 2;
 
+        SDL_BlitSurface(textSurface, nullptr, surface, &textRect);
+        SDL_FreeSurface(textSurface);
+    }
+
+    void SetCallback(std::function<void()> callback) {
+        OnClickCallback = std::move(callback);
+    }
+
+    void OnLeftClick() {
         if (OnClickCallback) {
-                OnClickCallback();
+            OnClickCallback();
         }
     }
 
-    UserEvents::SettingsConfig GetConfig() { return Config; }
+    void SetColor(SDL_Color color) {
+        Color = color;
+    }
 
-    std::string GetLocation() { return "Game Menu"; }
+    SDL_Rect GetRect() const {
+        return Rect;
+    }
 
 private:
-    UserEvents::SettingsConfig Config{UserEvents::SettingsPage::GAMEPLAY, 1920/2-255/2, 1080/2+50};
+    MainMenu& UIManager;
 
-    MainMenu &UIManager;
-    bool isSettingsOpen{false};
+    SDL_Rect Rect;
+    SDL_Color Color;
+    std::string Text;
+    SDL_Color TextColor;
+    int16_t FontSize;
+    TTF_Font* Font;
+
     std::function<void()> OnClickCallback;
 };

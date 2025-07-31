@@ -17,13 +17,13 @@ public:
         });
     }
 
-    void HandleEvent(SDL_Event& E) {
+    void HandleEvent(SDL_Event& E, SDL_Surface* surface) {
         switch (CurrentState) {
             case GameState::MAIN_MENU:
                 Menu.HandleEvent(E);
                 break;
             case GameState::GAMEPLAY:
-                Game.HandleEvent(E);
+                Game.HandleEvent(E, surface);
                 break;
             default:
                 break;

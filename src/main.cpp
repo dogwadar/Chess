@@ -2,6 +2,7 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
+#include <SDL2/SDL_image.h>
 #include <cstdio>
 #include <iostream>
 #include <SDL2/SDL.h>
@@ -22,6 +23,13 @@ int main() {
         return 1;
     }
 
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+        std::cerr << "IMG_Init Error: " << IMG_GetError() << std::endl;
+        TTF_Quit();
+        SDL_Quit();
+        return 1;
+    }
+
     Window GameWindow;
     GameStateController Controller;
 
@@ -29,11 +37,12 @@ int main() {
     while (true) {
         while (SDL_PollEvent(&E)) {
             if (E.type == SDL_QUIT) {
+                IMG_Quit();
                 TTF_Quit();
                 SDL_Quit();
                 return 0;
             }
-            Controller.HandleEvent(E);
+            Controller.HandleEvent(E, GameWindow.GetSurface());
         }
 
         GameWindow.Render();
