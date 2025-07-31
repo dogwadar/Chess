@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(MyChessProject)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Collect all source files in src/
+file(GLOB SOURCES "src/*.cpp")
+
+# Create executable named "chess"
+add_executable(chess ${SOURCES})
+
+# Optional: where to put the executable (inside build/)
+set_target_properties(chess PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build"
+)
